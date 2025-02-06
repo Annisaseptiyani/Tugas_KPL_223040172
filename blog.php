@@ -53,7 +53,7 @@
 <div class="container mt-5">
     <section class="d-flex">
         <main class="main-blog">
-        <div class="card main-blog-card mb-5">
+        <div class="card main-blog-card mb-5 d-flex">
   <img src="upload/blog/kereta_1.jpg" class="card-img-top" alt="...">
   <div class="card-body">
     <h5 class="card-title">Card title</h5>
@@ -63,7 +63,7 @@
   </div>
 </div>
 
-<div class="card main-blog-card mb-5">
+<div class="card main-blog-card mb-5 d-flex">
   <img src="upload/blog/kereta_1.jpg" class="card-img-top" alt="...">
   <div class="card-body">
     <h5 class="card-title">Card title</h5>
