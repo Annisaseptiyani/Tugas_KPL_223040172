@@ -1,7 +1,7 @@
 <?php 
 
 // Get All 
-function getAll($conn){
+function getAllPost($conn){
    $sql = "SELECT * FROM post 
            WHERE publish=1 ORDER BY post_id DESC";
    $stmt = $conn->prepare($sql);
@@ -41,7 +41,7 @@ function getAllPostsByCategory($conn, $category_id){
    }
 }
 // getById
-function getById($conn, $id){
+function getPostById($conn, $id){
    $sql = "SELECT * FROM post 
            WHERE post_id=? AND publish=1";
    $stmt = $conn->prepare($sql);
@@ -86,19 +86,7 @@ function serach($conn, $key){
        return 0;
    }
 }
-// getCategoryById
-function getCategoryById($conn, $id){
-   $sql = "SELECT * FROM category WHERE id=?";
-   $stmt = $conn->prepare($sql);
-   $stmt->execute([$id]);
 
-   if($stmt->rowCount() >= 1){
-         $data = $stmt->fetch();
-         return $data;
-   }else {
-       return 0;
-   }
-}
 
 //get 5 Categoies 
 
@@ -130,22 +118,10 @@ function getUserByID($conn, $id){
    }
 }
 
-// getAllCategories
-function getAllCategories($conn){
-   $sql = "SELECT * FROM category ORDER BY category";
-   $stmt = $conn->prepare($sql);
-   $stmt->execute();
 
-   if($stmt->rowCount() >= 1){
-         $data = $stmt->fetchAll();
-         return $data;
-   }else {
-       return 0;
-   }
-}
 
 // Delete By ID
-function deleteById($conn, $id){
+function deletePostById($conn, $id){
    $sql = "DELETE FROM post WHERE post_id=?";
    $stmt = $conn->prepare($sql);
    $res = $stmt->execute([$id]);
