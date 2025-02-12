@@ -8,7 +8,7 @@ function getAllPost($conn){
    $stmt->execute();
 
    if($stmt->rowCount() >= 1){
-   	   $data = $stmt->fetchAll();
+   	   $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
    	   return $data;
    }else {
    	 return 0;
@@ -21,7 +21,7 @@ function getAllDeep($conn){
    $stmt->execute();
 
    if($stmt->rowCount() >= 1){
-         $data = $stmt->fetchAll();
+         $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
          return $data;
    }else {
        return 0;
@@ -32,28 +32,23 @@ function getAllPostsByCategory($conn, $category_id){
    $sql = "SELECT * FROM post  WHERE category=? AND publish=1";
    $stmt = $conn->prepare($sql);
    $stmt->execute([$category_id]);
-
-   if($stmt->rowCount() >= 1){
-         $data = $stmt->fetchAll();
-         return $data;
-   }else {
-       return 0;
-   }
+   return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
 }
-// getById
-function getPostById($conn, $id){
-   $sql = "SELECT * FROM post 
-           WHERE post_id=? AND publish=1";
+// getPostById
+function getPostById($conn, $id) {
+   $sql = "SELECT * FROM post WHERE post_id = ?";
    $stmt = $conn->prepare($sql);
-   $stmt->execute([$id]);
+   $stmt->bindParam(1, $id, PDO::PARAM_INT);
+   $stmt->execute();
 
-   if($stmt->rowCount() >= 1){
-         $data = $stmt->fetch();
-         return $data;
-   }else {
-       return 0;
+   if ($stmt->rowCount() > 0) {
+       return $stmt->fetch(PDO::FETCH_ASSOC);
+   } else {
+       return null;
    }
 }
+
+
 // getById Deep - Admin
 function getByIdDeep($conn, $id){
    $sql = "SELECT * FROM post WHERE post_id=?";
@@ -69,7 +64,7 @@ function getByIdDeep($conn, $id){
 }
 
 // serach
-function serach($conn, $key){
+function search($conn, $key){
    # creating simple search temple :)  
    $key = "%{$key}%";
 
@@ -125,10 +120,16 @@ function deletePostById($conn, $id){
    $sql = "DELETE FROM post WHERE post_id=?";
    $stmt = $conn->prepare($sql);
    $res = $stmt->execute([$id]);
+   return $stmt->rowCount();
+}
 
-   if($res){
-   	   return 1;
-   }else {
-   	 return 0;
-   }
+// Update Post By ID
+function updatePostById($conn, $post_id, $title, $author, $content, $category){
+   $sql = "UPDATE post 
+           SET post_title=?, post_author=?, post_text=?, category=? 
+           WHERE post_id=?";
+   $stmt = $conn->prepare($sql);
+   $res = $stmt->execute([$title, $author, $content, $category, $post_id]);
+
+   return $res;
 }

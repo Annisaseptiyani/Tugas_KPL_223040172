@@ -5,6 +5,7 @@ if (isset($_SESSION['admin_id']) && isset($_SESSION['username']) && isset($_GET[
 	$post_id = $_GET['post_id'];
 	 
     include_once("data/Post.php");
+	include_once("data/Category.php");
     include_once("../db_conn.php");
     $post = getByIdDeep($conn, $post_id);
     $category = getCategoryById($conn, $post['category']); 
@@ -31,7 +32,8 @@ if (isset($_SESSION['admin_id']) && isset($_SESSION['username']) && isset($_GET[
          <div class="card main-blog-card mb-5">
 			  <img src="../upload/blog/<?=$post['cover_url'] ?>" class="card-img-top" alt="...">
 			  <div class="card-body">
-			    <h5 class="card-title"><?=$post['post_title'] ?></h5>
+			  <h6 class="card-Author">Penulis : <?=$post['post_author'] ?></h6>
+			    <h3 class="card-title"><?=$post['post_title'] ?></h3>
 			    <?=$post['post_text'] ?>
 			    <hr>
                 <p class="card-text d-flex justify-content-between">

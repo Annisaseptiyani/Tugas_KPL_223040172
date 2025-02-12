@@ -2,20 +2,23 @@
 session_start();
 
 if (isset($_SESSION['admin_id']) && isset($_SESSION['username']) 
-    && $_GET['comment_id']) {
+    && $_GET['post_id']) {
 
-  $id = $_GET['comment_id'];
+  $post_id = $_GET['post_id'];
 
+  include_once("data/Post.php");
   include_once("data/Comment.php");
   include_once("../db_conn.php");
-  $res = deleteCommentById($conn, $id);
+  $res = deletePostById($conn, $post_id);
+  $res2 = deleteCommentByPostId($conn, $post_id);
+  $res3 = deleteLikeByPostId($conn, $post_id);
   if ($res) {
       $sm = "Successfully deleted!"; 
-      header("Location: Comment.php?success=$sm");
+      header("Location: post.php?success=$sm");
       exit;
   }else {
     $em = "Unknown error occurred"; 
-    header("Location: Comment.php?error=$em");
+    header("Location: post.php?error=$em");
     exit;
   }
 

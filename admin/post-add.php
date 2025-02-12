@@ -62,6 +62,15 @@ if (isset($_SESSION['admin_id']) && isset($_SESSION['username'])) {
 		           class="form-control"
 		           name="cover">
 		  </div>
+
+          <div class="mb-3">
+		    <label class="form-label">Author</label>
+		    <input type="text" 
+		           class="form-control"
+		           name="author">
+
+		  </div>
+
 		  <div class="mb-3">
 		    <label class="form-label">Text</label>
 		    <textarea

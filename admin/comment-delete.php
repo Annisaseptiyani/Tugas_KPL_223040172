@@ -2,21 +2,20 @@
 session_start();
 
 if (isset($_SESSION['admin_id']) && isset($_SESSION['username']) 
-    && $_GET['id']) {
+    && $_GET['comment_id']) {
 
-  $id = $_GET['id'];
+  $id = $_GET['comment_id'];
 
-  include_once("data/Category.php");
-  include_once("data/Post.php");
+  include_once("data/Comment.php");
   include_once("../db_conn.php");
-  $res = deletecategoryById($conn, $id);
+  $res = deleteCommentById($conn, $id);
   if ($res) {
       $sm = "Successfully deleted!"; 
-      header("Location: Category.php?success=$sm");
+      header("Location: Comment.php?success=$sm");
       exit;
   }else {
     $em = "Unknown error occurred"; 
-    header("Location: Category.php?error=$em");
+    header("Location: Comment.php?error=$em");
     exit;
   }
 

@@ -17,6 +17,7 @@ if (isset($_SESSION['admin_id']) && isset($_SESSION['username'])) {
       $key = "hhdsfs1263z";
 	  include "inc/side-nav.php"; 
       include_once("data/Post.php");
+	  include_once("data/Category.php");
       include_once("data/Comment.php");
       include_once("../db_conn.php");
       $posts = getAllDeep($conn);
@@ -41,7 +42,7 @@ if (isset($_SESSION['admin_id']) && isset($_SESSION['username'])) {
 	 	<table class="table t1 table-bordered">
 		  <thead>
 		    <tr>
-		      <th scope="col">#</th>
+		      <th scope="col">No</th>
 		      <th>Title</th>
 		      <th>Category</th>
 		      <th>Comments</th>

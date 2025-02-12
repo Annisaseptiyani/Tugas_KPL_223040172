@@ -1,94 +1,163 @@
+<?php 
+session_start();
+$logged = false;
+if (isset($_SESSION['user_id']) && isset($_SESSION['username'])) {
+	 $logged = true;
+	 $user_id = $_SESSION['user_id'];
+    }
+  $notFound = 0;
+ ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog page</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel = "stylesheet" href="css/style.css">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>
+		<?php 
+		if(isset($_GET['search'])){ 
+			  echo "search '".htmlspecialchars($_GET['search'])."'"; 
+		}else{
+			echo "Blog Page";
+		} ?>
+	</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">MyBlog</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="index.php">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="about.php">About</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="Contact.php">Contact</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="blog.php">blog</a>
-        </li>
-        <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Category
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="Category.php">Category 1</a></li>
-            <li><a class="dropdown-item" href="Category.php">Category 2</a></li>
-          </ul>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="login.php">Login / Signup</a>
-        </li>
-      </ul>
-      
-      <form class="d-flex" role="search">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-        <button class="btn btn-outline-success" type="submit">Search</button>
-      </form>
-    </div>
-  </div>
-</nav> 
-
-<div class="container mt-5">
+	<?php 
+      include 'inc/NavBar.php';
+      include_once("admin/data/Post.php");
+      include_once("admin/data/Comment.php");
+      include_once("db_conn.php");
+      if(isset($_GET['search'])){
+      	 $key = $_GET['search'];
+         $posts = search($conn, $key);
+         if ($posts == 0) {
+         	  $notFound = 1;
+         }
+      }else {
+         $posts = getAllPost($conn);
+      }
+      $categories = get5Categoies($conn); 
+	 ?>
+    
+    <div class="container mt-5">
     <section class="d-flex">
-        <main class="main-blog">
-        <div class="card main-blog-card mb-5 d-flex">
-  <img src="upload/blog/kereta_1.jpg" class="card-img-top" alt="...">
-  <div class="card-body">
-    <h5 class="card-title">Card title</h5>
-    <p class="card-text">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ullam alias placeat iure facere quis velit nostrum assumenda saepe veniam nam illo tempore, repudiandae odio fugit. Dolorum quaerat praesentium labore nobis!</p>
-    <p class="card-text"><small class = "text-body-secondary">Last update 3 mins ago</small></p>
-    <a href="#" class="btn btn-primary">read more</a>
-  </div>
-</div>
+    	 
+  	   <?php if ($posts != 0) { ?>
+  	   <main class="main-blog">
+  	   	<h1 class="display-4 mb-4 fs-3">
+  	   	<?php 
+				if(isset($_GET['search'])){ 
+					  echo "Search <b>'".htmlspecialchars($_GET['search'])."'</b>"; 
+				}?></h1>
+  	   	<?php foreach ($posts as $post) { ?>
+  	   	   <div class="card main-blog-card mb-5">
+			  <img src="upload/blog/<?=$post['cover_url']?>" class="card-img-top" alt="...">
+			  <div class="card-body">
+			    <h5 class="card-title"><?=$post['post_title']?></h5>
+			    <?php 
+                    $p = strip_tags($post['post_text']); 
+                    $p = substr($p, 0, 200);               
+			     ?>
+			    <p class="card-text"><?=$p?>...</p>
+			    <a href="blog-view.php?post_id=<?=$post['post_id']?>" class="btn btn-primary">Read more</a>
+			    <hr>
+                <div class="d-flex justify-content-between">
+                	<div class="react-btns">
+            		<?php 
+            		$post_id = $post['post_id'];
+            		if ($logged) {
+            			$liked = isLikedByUserID($conn, $post_id, $user_id);
+            		
+                    
+                    if($liked){
+            		 ?>
+                	<i class="fa fa-thumbs-up liked like-btn" 
+				   	   post-id="<?=$post_id?>"
+				   	   liked="1"
+				   	   aria-hidden="true"></i>
+				       <?php }else{ ?>
+				    <i class="fa fa-thumbs-up like like-btn"
+				        post-id="<?=$post_id?>"
+				   	    liked="0"
+				        aria-hidden="true"></i>
+				    <?php } } else{ ?>
+				    <i class="fa fa-thumbs-up" aria-hidden="true"></i>
+				    <?php } ?>
+				   Likes (
+	        <span><?php 
+           echo likeCountByPostID($conn, $post['post_id']);
+	         ?></span> )
+				    <a href="blog-view.php?post_id=<?=$post['post_id']?>#comments">    
+                	<i class="fa fa-comment" aria-hidden="true"></i> Comments (
+				        <?php 
+		                    echo CountByPostID($conn, $post['post_id']);
+				         ?>
+				        )
+				    </a>	
+				    </div>	
+				    <small class="text-body-secondary"><?=$post['crated_at']?></small>
+                </div>	
+			    
+			  </div>
+			</div>
+		<?php } ?>
+  	   </main>
+  	   <?php }else { ?>
+  	   	<main class="main-blog p-2">
+  	   		<?php if($notFound){ ?>
+  	   			<div class="alert alert-warning"> 
+  	   				No search results found 
+  	   				<?php echo " - <b>key = '".htmlspecialchars($_GET['search'])."'</b>" ?>
+  	   			</div>
+  	   		<?php }else{ ?>
+  	   			<div class="alert alert-warning"> 
+  	   				No posts yet.
+  	   			</div>
+  	   		<?php } ?>
+  	   	</main>
+  	   <?php } ?>
+       <aside class="aside-main">
+       	   <div class="list-group category-aside">
+			  <a href="#" 
+			     class="list-group-item list-group-item-action active" 
+			     aria-current="true">
+			    Category
+			  </a>
+			  <?php foreach ($categories as $category ) { ?>
+			  <a href="category.php?category_id=<?=$category['id']?>" 
+			     class="list-group-item list-group-item-action">
+			  	<?php echo $category['category']; ?>
+			  </a>
+			  <?php } ?>
+			</div>
+       </aside>
+  </section>
+    </div>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  
+   <script>
+   	 $(document).ready(function(){
+			  $(".like-btn").click(function(){
+			     var post_id = $(this).attr('post-id');
+			     var liked = $(this).attr('liked');
 
-<div class="card main-blog-card mb-5 d-flex">
-  <img src="upload/blog/kereta_1.jpg" class="card-img-top" alt="...">
-  <div class="card-body">
-    <h5 class="card-title">Card title</h5>
-    <p class="card-text">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ullam alias placeat iure facere quis velit nostrum assumenda saepe veniam nam illo tempore, repudiandae odio fugit. Dolorum quaerat praesentium labore nobis!</p>
-    <p class="card-text"><small class = "text-body-secondary">Last update 3 mins ago</small></p>
-    <a href="#" class="btn btn-primary">read more</a>
-  </div>
-
-        </main>
-        <aside class="aside-main">
-        <div class="list-group category-aside">
-  <a href="#" class="list-group-item list-group-item-action active" aria-current="true">
-    Category
-  </a>
-  <a href="#" class="list-group-item list-group-item-action">Category 1</a>
-  <a href="#" class="list-group-item list-group-item-action">Category 2</a>
-  <a href="#" class="list-group-item list-group-item-action">Category 3</a>
-</div>
-        </aside>
-    </section>
-</div>
-
-
-
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+			     if (liked == 1) {
+                 $(this).attr('liked', '0');
+                 $(this).removeClass('liked');
+			     }else {
+                 $(this).attr('liked', '1');
+                 $(this).addClass('liked');
+			     }
+			     $(this).next().load("ajax/like-unlike.php",
+			     	{
+			     		post_id: post_id
+			     	});
+			  });
+		  });
+   </script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 </body>
 </html>
